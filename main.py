@@ -1,6 +1,6 @@
 from model import *
 
-# print(modelSelection('AAPL_Jun_2019_2020.csv', "AAPL"))
+print(modelSelection('AAPL_Jun_2019_2020.csv', "AAPL"))
 
 def highlights(ratings):
 	buy_and_sell = sorted(ratings, key=lambda x: x[0])

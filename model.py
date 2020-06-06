@@ -19,7 +19,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
 # Define the buy/sell rating as appropriate
-def closeRating(prediction):
+def rating(prediction):
     number_of_days = len(prediction) # How many days are in our test set
     initial_price = prediction['Prediction'].iloc[0] # Variable names for these
     final_price = prediction['Prediction'].iloc[-1] # are self explanatory
@@ -189,9 +189,9 @@ def generateCloseModel(data, ticker):
      
         rms = np.sqrt(mean_squared_error(test,forecast))
         
-    result = closeRating(forecast)
+    result = rating(forecast)
     result.append(rms)
-        
+    result.append(ticker)
     return tuple(result)
     
         
@@ -325,15 +325,15 @@ def HoltExp(data, ticker):
         rms = np.sqrt(mean_squared_error(test,forecast))
     print(rms)
         
-    result = closeRating(forecast)
+    result = rating(forecast)
     result.append(rms)
-        
+    result.append(ticker)    
     return tuple(result)
         
 def modelSelection(data, ticker):
     close = generateCloseModel(data, ticker)
     holt = HoltExp(data, ticker)
-    return [close, holt]
+    return sorted([close, holt], key=lambda x: x[2])[0]
     
 
 
