@@ -54,12 +54,19 @@ temp.plot(figsize=(15, 5), kind='line', title='Closing Prices(Monthwise)', fonts
 plt.show()
 # plots bar graph of mean closing price vs month - WORKING NOW
 new_temp = data_frame.groupby('month')['Close'].mean().plot.bar()
+plt.title('Average Closing Price By Month')
+plt.xlabel('Month')
+plt.ylabel('Stock Price')
 plt.show()
-# split dataset into testing and training sets - This wasn't working,now has been fixed
-test = data_frame[int(0.8*data_frame.size):] # last 20% of values
-train = data_frame[:int(0.8*data_frame.size)] # first 80% of values
-
-#TODO: display test and train on the same graph as shown in the medium doc
+# split dataset into testing and training sets - This wasn't working, now has been fixed
+limit = int(0.8*data_frame.shape[0])
+test = data_frame[limit:] # last 20% of values
+train = data_frame[:limit] # first 80% of values
+plt.plot(train.groupby(['Date']) ['Close'].mean(), color='blue', label='Train')
+plt.plot(test.groupby(['Date']) ['Close'].mean(), color='red', label='Test')
+plt.legend(loc='best')
+plt.title('Training and Test Data')
+plt.show()
 
 def test_stationarity(timeseries):
     # Determining rolling statistics
@@ -69,7 +76,7 @@ def test_stationarity(timeseries):
     # Plot rolling statistics
     plt.plot(timeseries, color='blue', label='Original')
     plt.plot(roll_mean, color='red', label='Rolling Mean')
-    plt.plot(roll_std, color='black', label='Rolling Std')
+    plt.plot(roll_std, color='white', label='Rolling Std')
     plt.legend(loc='best')
     plt.title('Rolling Mean and Standard Deviation')
     plt.show()  # using block = False stops graph from showing, but block = True seems to be the same as not including it at all
@@ -84,6 +91,7 @@ def test_stationarity(timeseries):
         output['critical value (%s)'%key] = values
         print(output)
 
+
 test_stationarity(train['Close'])
 
 # taking ln of training and testing closing values
@@ -92,8 +100,9 @@ test_log = np.log(test['Close'])
 
 # plotting moving average
 moving_avg = train_log.rolling(24).mean()
-plt.plot(train_log)
-plt.plot(moving_avg, color='red')
+plt.plot(train_log, label='Original')
+plt.plot(moving_avg, color='red', label='Moving Average')
+plt.title('Moving Average')
 plt.show()
 
 # removing trend to make time series stationary
@@ -116,16 +125,21 @@ test_stationarity(train_log_diff.dropna())
 model = auto_arima(train_log, trace=True, error_action='ignore', suppress_warnings=True)
 model.fit(train_log)
 
+# TODO: FIX ACTUAL STOCK PRICE AXIS
 # predict values on validation set
-#forecast = model.predict(n_periods=len(test))  # n_periods creates errors
-#forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
-
+forecast = model.predict(n_periods=len(test))  # n_periods creates errors
+forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
+forecast = np.exp(forecast)
+print("Forecast printing below")
+print(forecast)
 # check performance of model using RMSE as metric
-plt.plot(train_log, label='Train')
-plt.plot(test_log, label='Test')
-#plt.plot(forecast, label='Prediction')
+plt.plot(train.groupby(['Date']) ['Close'].mean(), label='Train')
+plt.plot(test.groupby(['Date']) ['Close'].mean(), label='Test')
+plt.plot(forecast, label='Prediction')
 plt.title('AAPL Stock Price Prediction')
 plt.xlabel('Time')
 plt.ylabel('Actual Stock Price')
 plt.legend(loc='upper left', fontsize=8)
 plt.show()
+
+# TODO: Generate BUY/SELL rating based on model prediction - don't work on this without talking to me first
