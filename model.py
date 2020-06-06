@@ -5,35 +5,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-from pylab import rcParams
+from pylab import rcParams 
 from datetime import datetime
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.arima_model import ARIMA
-from pmdarima.arima import auto_arima                           # needed to pip install this - which also fetched statsmodels
+# needed to pip install pmdarima - which also fetched statsmodels
+from pmdarima.arima import auto_arima     
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # inserts an entry into list of warning filters
 warnings.filterwarnings('ignore')   
 
 # style of graph being plotted - font style and related preferences (can be changed)
-plt.style.use('fivethirtyeight')
+plt.style.use('dark_background')
 
 # changing default figsize parameter
 rcParams['figure.figsize'] = 10, 6
 
-data_frame = pd.read_csv('.\AAPL_Jun_2019_2020.csv')    # modifed from example as path was not being picked up
+data_frame = pd.read_csv('AAPL_Jun_2019_2020.csv')    # modifed from example as path was not being picked up
 
 #print(data_frame['Date'])
 
 # gets Date column data
 con = data_frame['Date']
-
 # converts date column to a Python DateTime object
 data_frame['Date'] = pd.to_datetime(data_frame['Date'])
 
 # sets data_frame index to Date column
 data_frame.set_index('Date', inplace=True)
+
 
 #print(data_frame.index)
 
@@ -48,15 +49,17 @@ data_frame['day'] = data_frame.index.day
 # groups data by date and close - x axis is date, y axis is mean closing price
 temp = data_frame.groupby(['Date']) ['Close'].mean()
 
-# plots line graph of mean closing price vs date - not working for some reason
+# plots line graph of mean closing price vs date - WORKING NOW
 temp.plot(figsize=(15, 5), kind='line', title='Closing Prices(Monthwise)', fontsize=14)
+plt.show()
+# plots bar graph of mean closing price vs month - WORKING NOW
+new_temp = data_frame.groupby('month')['Close'].mean().plot.bar()
+plt.show()
+# split dataset into testing and training sets - This wasn't working,now has been fixed
+test = data_frame[int(0.8*data_frame.size):] # last 20% of values
+train = data_frame[:int(0.8*data_frame.size)] # first 80% of values
 
-# plots bar graph of mean closing price vs month - crashes code
-#data_frame.groupby('month')['Close'].mean().plot.bar()
-
-# split dataset into testing and training sets
-test = data_frame[1029:]
-train = data_frame[:1028]
+#TODO: display test and train on the same graph as shown in the medium doc
 
 def test_stationarity(timeseries):
     # Determining rolling statistics
