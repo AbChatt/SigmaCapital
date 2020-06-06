@@ -14,14 +14,6 @@ from statsmodels.tsa.arima_model import ARIMA
 from pmdarima.arima import auto_arima     
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-# inserts an entry into list of warning filters
-warnings.filterwarnings('ignore')   
-
-# style of graph being plotted - font style and related preferences (can be changed)
-plt.style.use('dark_background')
-
-# changing default figsize parameter
-rcParams['figure.figsize'] = 10, 6
 
 
 # Define the buy/sell rating as appropriate
@@ -32,10 +24,10 @@ def rating(prediction):
     model_slope = (prediction['Prediction'].iloc[-1] - initial_price)/number_of_days # Basic linear regression 
     
     if model_slope > 0:
-        return "BUY"
+        return ["BUY", model_slope]
     else:
-        return "SELL"
-        
+        return ["SELL", model_slope]
+    
 # Determine if timeseries is stationary
 def test_stationarity(timeseries):
     # Determining rolling statistics
@@ -66,8 +58,18 @@ def test_stationarity(timeseries):
         return False
     else:
         return True # The null hypothesis IS stationary
-
-def generateModel(data, ticker):
+        
+def generateCloseModel(data, ticker):
+    
+    # inserts an entry into list of warning filters
+    warnings.filterwarnings('ignore')   
+    
+    # style of graph being plotted - font style and related preferences (can be changed)
+    plt.style.use('dark_background')
+    
+    # changing default figsize parameter
+    rcParams['figure.figsize'] = 10, 6
+    
     data_frame = pd.read_csv(data)    # modified from example as path was not being picked up
     
     # gets Date column data
@@ -138,13 +140,7 @@ def generateModel(data, ticker):
         train_log_diff = train_log - train_log.shift(1)
         test_stationarity(train_log_diff.dropna())
     
-    # check stationarity of residuals - confirms if there is seasonality
-    #train_log_decompose = pd.DataFrame(residual)    # residual is not defined
-    #train_log_decompose['date'] = train_log.index
-    #train_log_decompose.set_index('date', inplace=True)
-    #train_log_decompose.dropna(inplace=True)
-    #test_stationarity(train_log_decompose[0])
-    
+
     # fit auto ARIMA - fit model on the univariate series
     
         model = auto_arima(train_log, trace=True, error_action='ignore', suppress_warnings=True)
@@ -166,10 +162,9 @@ def generateModel(data, ticker):
         plt.show()
     
         # check performance of model using RMSE as metric
-        # print()
-        # print("Mean Squared Error follows below")
+
         rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
-        # print("RMSE: ", rms)
+
     else:
         model = auto_arima(train, trace=True, error_action='ignore', suppress_warnings=True)
         model.fit(train)
@@ -189,18 +184,21 @@ def generateModel(data, ticker):
         plt.show()
         
         # check performance of model using RMSE as metric
-        # print()
-        # print("Mean Squared Error follows below")
+     
         rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
-        # print("RMSE: ", rms)
         
-    return (rating(forecast),rms)
+    result = rating(forecast)
+    result.append(rms)
+        
+    return tuple(result)
     
         
     # print(f" You should {rating(forecast)} this stock")
 
-
-print(generateModel('AAPL_Jun_2019_2020.csv', "AAPL"))
+def modelSelection(data, ticker):
+    close = generateCloseModel(data, ticker)
+    return close
+    
 
 # --- NEXT TASKS ---#
 # TODO: Develop other models based on volume, etc
