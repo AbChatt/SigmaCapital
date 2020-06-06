@@ -25,7 +25,6 @@ rcParams['figure.figsize'] = 10, 6
 
 data_frame = pd.read_csv('AAPL_Jun_2019_2020.csv')    # modifed from example as path was not being picked up
 
-#print(data_frame['Date'])
 
 # gets Date column data
 con = data_frame['Date']
@@ -34,9 +33,6 @@ data_frame['Date'] = pd.to_datetime(data_frame['Date'])
 
 # sets data_frame index to Date column
 data_frame.set_index('Date', inplace=True)
-
-
-#print(data_frame.index)
 
 # get Year, Month and Day columns
 data_frame['year'] = data_frame.index.year
@@ -52,12 +48,15 @@ temp = data_frame.groupby(['Date']) ['Close'].mean()
 # plots line graph of mean closing price vs date - WORKING NOW
 temp.plot(figsize=(15, 5), kind='line', title='Closing Prices(Monthwise)', fontsize=14)
 plt.show()
+
 # plots bar graph of mean closing price vs month - WORKING NOW
-new_temp = data_frame.groupby('month')['Close'].mean().plot.bar()
-plt.title('Average Closing Price By Month')
-plt.xlabel('Month')
-plt.ylabel('Stock Price')
-plt.show()
+# new_temp = data_frame.groupby('month')['Close'].mean().plot.bar()
+# plt.title('Average Closing Price By Month')
+# plt.xlabel('Month')
+# plt.ylabel('Stock Price')
+# plt.show()
+
+
 # split dataset into testing and training sets - This wasn't working, now has been fixed
 limit = int(0.8*data_frame.shape[0])
 test = data_frame[limit:] # last 20% of values
@@ -67,84 +66,6 @@ plt.plot(test.groupby(['Date']) ['Close'].mean(), color='red', label='Test')
 plt.legend(loc='best')
 plt.title('Training and Test Data')
 plt.show()
-
-def test_stationarity(timeseries):
-    # Determining rolling statistics
-    roll_mean = timeseries.rolling(12).mean()
-    roll_std = timeseries.rolling(12).std()
-
-    # Plot rolling statistics
-    plt.plot(timeseries, color='blue', label='Original')
-    plt.plot(roll_mean, color='red', label='Rolling Mean')
-    plt.plot(roll_std, color='white', label='Rolling Std')
-    plt.legend(loc='best')
-    plt.title('Rolling Mean and Standard Deviation')
-    plt.show()  # using block = False stops graph from showing, but block = True seems to be the same as not including it at all
-
-    # running Augmented Dickey Fuller Test
-    print("Results of Dickey Fuller test")
-    adft = adfuller(timeseries, autolag='AIC')
-    
-    # adfuller gives output without labels - need to manually write what values mean using for loop
-    output = pd.Series(adft[0:4], index=['Test Statistics', 'p-value', 'No. of lags used', 'Number of observations used'])
-    for key, values in adft[4].items():
-        output['critical value (%s)'%key] = values
-        print(output)
-
-
-test_stationarity(train['Close'])
-
-# taking ln of training and testing closing values
-train_log = np.log(train['Close'])
-test_log = np.log(test['Close'])
-
-# plotting moving average
-moving_avg = train_log.rolling(24).mean()
-plt.plot(train_log, label='Original')
-plt.plot(moving_avg, color='red', label='Moving Average')
-plt.title('Moving Average')
-plt.show()
-
-# removing trend to make time series stationary
-train_log_moving_avg_diff = train_log - moving_avg
-train_log_moving_avg_diff.dropna(inplace=True)  # took average of first 24 values, so rolling mean is not defined for first 23 - drop values
-test_stationarity(train_log_moving_avg_diff)
-
-# stabilise mean of time series - required for stationary time series
-train_log_diff = train_log - train_log.shift(1)
-test_stationarity(train_log_diff.dropna())
-
-# check stationarity of residuals - confirms if there is seasonality
-#train_log_decompose = pd.DataFrame(residual)    # residual is not defined
-#train_log_decompose['date'] = train_log.index
-#train_log_decompose.set_index('date', inplace=True)
-#train_log_decompose.dropna(inplace=True)
-#test_stationarity(train_log_decompose[0])
-
-# fit auto ARIMA - fit model on the univariate series
-model = auto_arima(train_log, trace=True, error_action='ignore', suppress_warnings=True)
-model.fit(train_log)
-
-# predict values on validation set
-forecast = model.predict(n_periods=len(test))  # n_periods creates errors
-forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
-forecast = np.exp(forecast) # Adjust for non-log values
-
-# Graph forecasts vs actual
-plt.plot(train.groupby(['Date']) ['Close'].mean(), label='Train')
-plt.plot(test.groupby(['Date']) ['Close'].mean(), label='Test')
-plt.plot(forecast, label='Prediction')
-plt.title('AAPL Stock Price Prediction')
-plt.xlabel('Time')
-plt.ylabel('Actual Stock Price')
-plt.legend(loc='upper left', fontsize=8)
-plt.show()
-
-# check performance of model using RMSE as metric
-print()
-print("Mean Squared Error follows below")
-rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
-print("RMSE: ", rms)
 
 # Define the buy/sell rating as appropriate
 def rating(prediction):
@@ -157,9 +78,123 @@ def rating(prediction):
         return "BUY"
     else:
         return "SELL"
+        
+def test_stationarity(timeseries):
+    # Determining rolling statistics
+    roll_mean = timeseries.rolling(12).mean()
+    roll_std = timeseries.rolling(12).std()
+
+    # Plot rolling statistics
+    # plt.plot(timeseries, color='blue', label='Original')
+    # plt.plot(roll_mean, color='red', label='Rolling Mean')
+    # plt.plot(roll_std, color='white', label='Rolling Std')
+    # plt.legend(loc='best')
+    # plt.title('Rolling Mean and Standard Deviation')
+    # plt.show()  # using block = False stops graph from showing, but block = True seems to be the same as not including it at all
+
+    # running Augmented Dickey Fuller Test
+    print("Results of Dickey Fuller test")
+    adft = adfuller(timeseries, autolag='AIC')
     
-# print(forecast)
-# print(rating(forecast))
+    # adfuller gives output without labels - need to manually write what values mean using for loop
+    output = pd.Series(adft[0:4], index=['Test Statistics', 'p-value', 'No. of lags used', 'Number of observations used'])
+    for key, values in adft[4].items():
+        output['critical value (%s)'%key] = values
+    
+    test_stats = output[0] # Test statistics
+    critical_values = output[4] # Critical values
+    
+    if test_stats > critical_values: # If the test statistics are more than the critical values, the null hypothesis passes and it is not stationary
+        return False
+    else:
+        return True # The null hypothesis IS stationary
+
+
+is_stationary = test_stationarity(train['Close'])
+
+#-- SUMMARY OF LINES 118 - 194 -------------
+# If the stock prices are not stationary, we remove the trends and seasonality
+
+if not is_stationary:
+# taking ln of training and testing closing values
+    train_log = np.log(train['Close'])
+    test_log = np.log(test['Close'])
+
+    # plotting moving average
+    moving_avg = train_log.rolling(24).mean()
+    # plt.plot(train_log, label='Original')
+    # plt.plot(moving_avg, color='red', label='Moving Average')
+    # plt.title('Moving Average')
+    # plt.show()
+
+    # removing trend to make time series stationary
+    train_log_moving_avg_diff = train_log - moving_avg
+    train_log_moving_avg_diff.dropna(inplace=True)  # took average of first 24 values, so rolling mean is not defined for first 23 - drop values
+
+# test_stationarity(train_log_moving_avg_diff)
+
+    # stabilise mean of time series - required for stationary time series
+    train_log_diff = train_log - train_log.shift(1)
+    test_stationarity(train_log_diff.dropna())
+
+# check stationarity of residuals - confirms if there is seasonality
+#train_log_decompose = pd.DataFrame(residual)    # residual is not defined
+#train_log_decompose['date'] = train_log.index
+#train_log_decompose.set_index('date', inplace=True)
+#train_log_decompose.dropna(inplace=True)
+#test_stationarity(train_log_decompose[0])
+
+# fit auto ARIMA - fit model on the univariate series
+
+    model = auto_arima(train_log, trace=True, error_action='ignore', suppress_warnings=True)
+    model.fit(train_log)
+
+    # predict values on validation set
+    forecast = model.predict(n_periods=len(test))  # n_periods creates errors
+    forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
+    forecast = np.exp(forecast) # Adjust for non-log values
+
+    # Graph forecasts vs actual
+    plt.plot(train.groupby(['Date']) ['Close'].mean(), label='Train')
+    plt.plot(test.groupby(['Date']) ['Close'].mean(), label='Test')
+    plt.plot(forecast, label='Prediction')
+    plt.title('AAPL Stock Price Prediction')
+    plt.xlabel('Time')
+    plt.ylabel('Actual Stock Price')
+    plt.legend(loc='upper left', fontsize=8)
+    plt.show()
+
+    # check performance of model using RMSE as metric
+    print()
+    print("Mean Squared Error follows below")
+    rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
+    print("RMSE: ", rms)
+else:
+    model = auto_arima(train, trace=True, error_action='ignore', suppress_warnings=True)
+    model.fit(train)
+    
+    # predict values on validation set
+    forecast = model.predict(n_periods=len(test))  # n_periods creates errors
+    forecast = pd.DataFrame(forecast, index=test.index, columns=['Prediction'])
+    
+    # Graph forecasts vs actual
+    plt.plot(train.groupby(['Date']) ['Close'].mean(), label='Train')
+    plt.plot(test.groupby(['Date']) ['Close'].mean(), label='Test')
+    plt.plot(forecast, label='Prediction')
+    plt.title('AAPL Stock Price Prediction')
+    plt.xlabel('Time')
+    plt.ylabel('Actual Stock Price')
+    plt.legend(loc='upper left', fontsize=8)
+    plt.show()
+    
+    # check performance of model using RMSE as metric
+    print()
+    print("Mean Squared Error follows below")
+    rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
+    print("RMSE: ", rms)
+
+    
+print(f" You should {rating(forecast)} this stock")
 
 # --- NEXT TASKS ---#
 # TODO: Confirm if residuals can be ignored
