@@ -125,14 +125,12 @@ test_stationarity(train_log_diff.dropna())
 model = auto_arima(train_log, trace=True, error_action='ignore', suppress_warnings=True)
 model.fit(train_log)
 
-# TODO: FIX ACTUAL STOCK PRICE AXIS
 # predict values on validation set
 forecast = model.predict(n_periods=len(test))  # n_periods creates errors
 forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
-forecast = np.exp(forecast)
-print("Forecast printing below")
-print(forecast)
-# check performance of model using RMSE as metric
+forecast = np.exp(forecast) # Adjust for non-log values
+
+# Graph forecasts vs actual
 plt.plot(train.groupby(['Date']) ['Close'].mean(), label='Train')
 plt.plot(test.groupby(['Date']) ['Close'].mean(), label='Test')
 plt.plot(forecast, label='Prediction')
@@ -142,4 +140,31 @@ plt.ylabel('Actual Stock Price')
 plt.legend(loc='upper left', fontsize=8)
 plt.show()
 
-# TODO: Generate BUY/SELL rating based on model prediction - don't work on this without talking to me first
+# check performance of model using RMSE as metric
+print()
+print("Mean Squared Error follows below")
+rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
+print("RMSE: ", rms)
+
+# Define the buy/sell rating as appropriate
+def rating(prediction):
+    number_of_days = len(prediction) # How many days are in our test set
+    initial_price = prediction['Prediction'].iloc[0] # Variable names for these
+    final_price = prediction['Prediction'].iloc[-1] # are self explanatory
+    model_slope = (prediction['Prediction'].iloc[-1] - initial_price)/number_of_days # Basic linear regression 
+    
+    if model_slope > 0:
+        return "BUY"
+    else:
+        return "SELL"
+    
+# print(forecast)
+# print(rating(forecast))
+
+# --- NEXT TASKS ---#
+# TODO: Confirm if residuals can be ignored
+# TODO: Encapsulate everything into one nice function
+# TODO: Develop other models based on volume, etc
+# TODO: Develop model evaluation
+# TODO: Adopt and migrate to stocks API
+# TODO: Present status using InitialState
