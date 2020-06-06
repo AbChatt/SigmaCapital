@@ -168,8 +168,8 @@ def generateCloseModel(data, ticker):
         rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
 
     else:
-        model = auto_arima(train, trace=True, error_action='ignore', suppress_warnings=True)
-        model.fit(train)
+        model = auto_arima(train['Close'], trace=True, error_action='ignore', suppress_warnings=True)
+        model.fit(train['Close'])
         
         # predict values on validation set
         forecast = model.predict(n_periods=len(test))  # n_periods creates errors
@@ -187,7 +187,7 @@ def generateCloseModel(data, ticker):
         
         # check performance of model using RMSE as metric
      
-        rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
+        rms = np.sqrt(mean_squared_error(test,forecast))
         
     result = closeRating(forecast)
     result.append(rms)
@@ -280,11 +280,11 @@ def HoltExp(data, ticker):
         
         # fit Exponential Smoothing - fit model on the univariate series
         
-        model = ExponentialSmoothing(np.array(train_log['Close']), trend='mul', seasonal=None, damped=True)
-        model.fit(train_log)
+        model = ExponentialSmoothing(np.array(train_log), trend='mul', seasonal=None, damped=True)
+        fit = model.fit()
 
         # predict values on validation set
-        forecast = model.forecast(np.asarray(len(test)))  # n_periods creates errors
+        forecast = fit.forecast(np.asarray(len(test)))  # n_periods creates errors
         forecast = pd.DataFrame(forecast, index=test_log.index, columns=['Prediction'])
         forecast = np.exp(forecast) # Adjust for non-log values
         
@@ -304,10 +304,10 @@ def HoltExp(data, ticker):
         
     else:
         model = ExponentialSmoothing(np.array(train['Close']), trend='mul', seasonal=None, damped=True)
-        model.fit(train)
+        fit = model.fit()
 
         # predict values on validation set
-        forecast = model.forecast(len(test))  # n_periods creates errors
+        forecast = fit.forecast(len(test))  # n_periods creates errors
         forecast = pd.DataFrame(forecast, index=test.index, columns=['Prediction'])
         
         # Graph forecasts vs actual
@@ -322,16 +322,18 @@ def HoltExp(data, ticker):
         
         # check performance of model using RMSE as metric
         
-        rms = np.sqrt(mean_squared_error(test_log,np.log(forecast)))
+        rms = np.sqrt(mean_squared_error(test,forecast))
+    print(rms)
         
-    result = HoltRating(forecast)
+    result = closeRating(forecast)
     result.append(rms)
         
     return tuple(result)
         
 def modelSelection(data, ticker):
     close = generateCloseModel(data, ticker)
-    return close
+    holt = HoltExp(data, ticker)
+    return [close, holt]
     
 
 
