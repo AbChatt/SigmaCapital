@@ -31,9 +31,9 @@ def rating(prediction):
     final_price = prediction['Prediction'].iloc[-1] # are self explanatory
     model_slope = (prediction['Prediction'].iloc[-1] - initial_price)/number_of_days # Basic linear regression
 
-    if model_slope > 0:
+    if model_slope > 0.01:
         return ["BUY", model_slope]
-    elif round(model_slope) == 0:
+    elif round(model_slope) == 0 and model_slope > 0:
         return["HOLD", model_slope]
     else:
         return ["SELL", model_slope]
@@ -265,10 +265,11 @@ def goldenDeathCross(data_frame, ticker):
     test = data_frame[limit:] # last 20% of values
     train = data_frame[:limit] # first 80% of values
     # Plot into graph
-    #plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
-    #plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
-    #plt.legend(loc='best')
-    #plt.title('Training and Test Data')
+    # plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
+    # plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
+    # plt.legend(loc='best')
+    # plt.title('Training and Test Data')
+    # plt.savefig(f"{ticker}_TrainTest.png")
     #plt.show()
 
     is_stationary = test_stationarity(train['4. close'])
@@ -368,7 +369,6 @@ def modelSelection(data_frame, ticker):
     
     # groups data by date and close - x axis is date, y axis is mean closing price
     temp = data_frame.groupby(['date']) ['4. close'].mean()
-    temp['date'] = pd.to_datetime(data_frame.index)
     
     # plots line graph of mean closing price vs date - WORKING NOW
     # temp.plot(figsize=(15, 5), kind='line', title=f'{ticker} Closing Prices', fontsize=14)
