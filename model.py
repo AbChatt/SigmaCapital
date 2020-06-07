@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import asyncio
 
 from pylab import rcParams
 from datetime import datetime
@@ -18,6 +19,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # import API
 from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.async_support.timeseries import TimeSeries
 
 
 
@@ -253,9 +255,78 @@ def HoltExp(data_frame, ticker):
     return tuple(result)
 
 
+def goldenDeathCross(data_frame, ticker):
+
+    # split dataset into testing and training sets - This wasn't working, now has been fixed
+    limit = int(0.9*data_frame.shape[0])
+    test = data_frame[limit:] # last 20% of values
+    train = data_frame[:limit] # first 80% of values
+    # Plot into graph
+    #plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
+    #plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
+    #plt.legend(loc='best')
+    #plt.title('Training and Test Data')
+    #plt.show()
+
+    is_stationary = test_stationarity(train['4. close'])
+
+    #-- SUMMARY OF LINES 118 - 194 -------------
+    # If the stock prices are not stationary, we remove the trends and seasonality
+
+    # taking ln of training and testing closing values
+    train_log = np.log(train['4. close'])
+    test_log = np.log(test['4. close'])
+
+    # plotting moving average
+    moving_avg_200 = train_log.rolling(200).mean()
+    moving_avg_50 = train_log.rolling(50).mean()
+    plt.plot(train_log, label='Original')
+    plt.plot(moving_avg_200, color='red', label='200 Day Moving Average')
+    plt.plot(moving_avg_50, color='green', label='50 Day Moving Average')
+    plt.title('Moving Average')
+    plt.legend(loc='upper left', fontsize=8)
+    plt.show()
 
 
-def modelSelection(ticker):
+    # removing trend to make time series stationary
+    train_log_moving_avg_diff = train_log - moving_avg_200
+    train_log_moving_avg_diff.dropna(inplace=True)  # took average of first 24 values, so rolling mean is not defined for first 23 - drop values
+    
+    # stabilise mean of time series - required for stationary time series
+    train_log_diff = train_log - train_log.shift(1)
+    test_stationarity(train_log_diff.dropna())
+
+    #print(test)
+
+    # checking values of moving average curves near split of train and test sets
+    #moving_avg_200_value = (np.log((data_frame[limit - 198:limit + 2])['4. close'])).rolling(200).mean()
+    #moving_avg_50_value = (np.log((data_frame[limit - 48:limit + 2])['4. close'])).rolling(50).mean()
+    
+    moving_avg_200.dropna(inplace=True)
+
+    moving_avg_50.dropna(inplace=True)
+    #moving_avg_50.drop(moving_avg_50[moving_avg_50['date'] < moving_avg_200['date']].index, axis=1, inplace=True)
+    #print(moving_avg_50.index)
+
+    #print(data_frame[:limit + 1].index[-1])
+    #boundary = (data_frame[:limit + 1].index[-1]).strftime("%Y-%m-%d")
+    #print(boundary)
+    #print(type(boundary))
+
+    #print(moving_avg_200.index)
+    #print(moving_avg_50.index)
+    #print(moving_avg_200[0])
+    #moving_avg_200_filtered = moving_avg_200[moving_avg_200.index >= boundary]
+    #print(moving_avg_200_filtered)
+    #print(moving_avg_200.index)
+    #print(moving_avg_50_value)
+
+    if (moving_avg_50[-1] > moving_avg_200[-1]):
+        return "BUY"
+    else:
+        return "SELL"
+
+def modelSelection(data_frame, ticker):
     # inserts an entry into list of warning filters
     warnings.filterwarnings('ignore')
     
@@ -264,11 +335,14 @@ def modelSelection(ticker):
     
     # changing default figsize parameter
     rcParams['figure.figsize'] = 10, 6
+
+    #print("Please enter your API key: ")
+    #api_key = input()
     
-    ts = TimeSeries(key='BFNMGWERB9T9B5AO', output_format='pandas')
+    #ts = TimeSeries(key=api_key, output_format='pandas')
     
     
-    data_frame, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
+    #data_frame, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
     # pd.read_csv(data)    # modified from example as path was not being picked up
     
     # gets Date column data
@@ -305,8 +379,16 @@ def modelSelection(ticker):
     
     close = generateCloseModel(data_frame, ticker)
     holt = HoltExp(data_frame, ticker)
-    # return(close, holt)
-    return sorted([close], key=lambda x: x[2])[0]
+    goldenCross = goldenDeathCross(data_frame, ticker)
+    return(close, holt, goldenCross)
+    #return sorted([close], key=lambda x: x[2])[0]
+    #return goldenCross
+
+async def get_data(ticker, api_key):
+    ts = TimeSeries(key=api_key, output_format='pandas')
+    data_frame, _ = await ts.get_daily(symbol=ticker, outputsize='full')
+    await ts.close()
+    return data_frame
 
 
 
@@ -314,6 +396,5 @@ def modelSelection(ticker):
 # --- NEXT TASKS ---#
 # TODO: Develop other models based on volume, etc
 # TODO: Async
-# TODO: API Key Encapsulation
 # TODO: Present status using InitialState
 # TODO: S&P 500 metrics
