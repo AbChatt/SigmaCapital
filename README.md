@@ -2,10 +2,10 @@
  A revolutionary new approach to stock investing through data driven recommendations. SigmaCapital seeks to empower you to make informed financial decisions using the power of data analytics.
 
 # Table of Contents
-* [Introduction](https://github.com/AbChatt/SigmaCapital#introduction)
-* [Technologies](https://github.com/AbChatt/SigmaCapital#technologies)
-* [Requirements](https://github.com/AbChatt/SigmaCapital#requirements)
-* [Acknowledgements](https://github.com/AbChatt/SigmaCapital#acknowledgements)
+* [Introduction](https://github.com/AbChatt/Stocks-Forecasting-Bot#introduction)
+* [Technologies](https://github.com/AbChatt/Stocks-Forecasting-Bot#technologies)
+* [Requirements](https://github.com/AbChatt/Stocks-Forecasting-Bot#requirements)
+* [Acknowledgements](https://github.com/AbChatt/Stocks-Forecasting-Bot#acknowledgements)
 
 ## Introduction
 Investing into the stock market has always beeen a daunting task. For first time buyers, there are many pitfalls to avoid. Which stocks should I invest in? What current market trends do I need to be aware of? When should I sell my shares? These are commmon concerns that can arise when dipping your toes into the stock market. SigmaCapital was conceived as a response to these challenges and seeks to simplify the convoluted world of finance and stock market investing. We use advanced data analytics in order to generate real time predictions about the near future value of a stock, giving you the insights you need in order to make informed decisions on the stock market and maximise your returns. 
