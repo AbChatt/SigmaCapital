@@ -23,6 +23,7 @@ from alpha_vantage.async_support.timeseries import TimeSeries
 
 
 
+
 # Define the buy/sell rating as appropriate
 def rating(prediction):
     number_of_days = len(prediction) # How many days are in our test set
@@ -32,6 +33,8 @@ def rating(prediction):
 
     if model_slope > 0:
         return ["BUY", model_slope]
+    elif round(model_slope) == 0:
+        return["HOLD", model_slope]
     else:
         return ["SELL", model_slope]
 
@@ -73,11 +76,11 @@ def generateCloseModel(data_frame, ticker):
     test = data_frame[limit:] # last 20% of values
     train = data_frame[:limit] # first 80% of values
     # Plot into graph
-    plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
-    plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
-    plt.legend(loc='best')
-    plt.title('Training and Test Data')
-    plt.show()
+    # plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
+    # plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
+    # plt.legend(loc='best')
+    # plt.title('Training and Test Data')
+    # plt.show()
 
     is_stationary = test_stationarity(train['4. close'])
 
@@ -119,14 +122,14 @@ def generateCloseModel(data_frame, ticker):
 
 
         # Graph forecasts vs actual
-        plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
-        plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
-        plt.plot(forecast, color='red', label='Prediction')
-        plt.title(f'{ticker} Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel('Actual Stock Price')
-        plt.legend(loc='upper left', fontsize=8)
-        plt.show()
+        # plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
+        # plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
+        # plt.plot(forecast, color='red', label='Prediction')
+        # plt.title(f'{ticker} Stock Price Prediction')
+        # plt.xlabel('Time')
+        # plt.ylabel('Actual Stock Price')
+        # plt.legend(loc='upper left', fontsize=8)
+        # plt.show()
 
         # check performance of model using RMSE as metric
 
@@ -141,14 +144,14 @@ def generateCloseModel(data_frame, ticker):
         forecast = pd.DataFrame(forecast, index=test.index, columns=['Prediction'])
 
         # Graph forecasts vs actual
-        plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
-        plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
-        plt.plot(forecast, color='red', label='Prediction')
-        plt.title(f'{ticker} Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel('Actual Stock Price')
-        plt.legend(loc='upper left', fontsize=8)
-        plt.show()
+        # plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
+        # plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
+        # plt.plot(forecast, color='red', label='Prediction')
+        # plt.title(f'{ticker} Stock Price Prediction')
+        # plt.xlabel('Time')
+        # plt.ylabel('Actual Stock Price')
+        # plt.legend(loc='upper left', fontsize=8)
+        # plt.show()
 
         # check performance of model using RMSE as metric
 
@@ -169,11 +172,11 @@ def HoltExp(data_frame, ticker):
     test = data_frame[limit:] # last 20% of values
     train = data_frame[:limit] # first 80% of values
     # Plot into graph
-    plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
-    plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
-    plt.legend(loc='best')
-    plt.title('Training and Test Data')
-    plt.show()
+    # plt.plot(train.groupby(['date']) ['4. close'].mean(), color='blue', label='Train')
+    # plt.plot(test.groupby(['date']) ['4. close'].mean(), color='red', label='Test')
+    # plt.legend(loc='best')
+    # plt.title('Training and Test Data')
+    # plt.show()
 
     is_stationary = test_stationarity(train['4. close'])
 
@@ -214,14 +217,14 @@ def HoltExp(data_frame, ticker):
         forecast = np.exp(forecast) # Adjust for non-log values
 
         # Graph forecasts vs actual
-        plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
-        plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
-        plt.plot(forecast, color='red', label='Prediction')
-        plt.title(f'{ticker} Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel('Actual Stock Price')
-        plt.legend(loc='upper left', fontsize=8)
-        plt.show()
+        # plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
+        # plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
+        # plt.plot(forecast, color='red', label='Prediction')
+        # plt.title(f'{ticker} Stock Price Prediction')
+        # plt.xlabel('Time')
+        # plt.ylabel('Actual Stock Price')
+        # plt.legend(loc='upper left', fontsize=8)
+        # plt.show()
 
         # check performance of model using RMSE as metric
 
@@ -236,14 +239,14 @@ def HoltExp(data_frame, ticker):
         forecast = pd.DataFrame(forecast, index=test.index, columns=['Prediction'])
 
         # Graph forecasts vs actual
-        plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
-        plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
-        plt.plot(forecast, color='red', label='Prediction')
-        plt.title(f'{ticker} Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel('Actual Stock Price')
-        plt.legend(loc='upper left', fontsize=8)
-        plt.show()
+        # plt.plot(train.groupby(['date']) ['4. close'].mean(), label='Train')
+        # plt.plot(test.groupby(['date']) ['4. close'].mean(), label='Test')
+        # plt.plot(forecast, color='red', label='Prediction')
+        # plt.title(f'{ticker} Stock Price Prediction')
+        # plt.xlabel('Time')
+        # plt.ylabel('Actual Stock Price')
+        # plt.legend(loc='upper left', fontsize=8)
+        # plt.show()
 
         # check performance of model using RMSE as metric
 
@@ -280,12 +283,12 @@ def goldenDeathCross(data_frame, ticker):
     # plotting moving average
     moving_avg_200 = train_log.rolling(200).mean()
     moving_avg_50 = train_log.rolling(50).mean()
-    plt.plot(train_log, label='Original')
-    plt.plot(moving_avg_200, color='red', label='200 Day Moving Average')
-    plt.plot(moving_avg_50, color='green', label='50 Day Moving Average')
-    plt.title('Moving Average')
-    plt.legend(loc='upper left', fontsize=8)
-    plt.show()
+    # plt.plot(train_log, label='Original')
+    # plt.plot(moving_avg_200, color='red', label='200 Day Moving Average')
+    # plt.plot(moving_avg_50, color='green', label='50 Day Moving Average')
+    # plt.title('Moving Average')
+    # plt.legend(loc='upper left', fontsize=8)
+    # plt.show()
 
 
     # removing trend to make time series stationary
@@ -365,10 +368,12 @@ def modelSelection(data_frame, ticker):
     
     # groups data by date and close - x axis is date, y axis is mean closing price
     temp = data_frame.groupby(['date']) ['4. close'].mean()
+    temp['date'] = pd.to_datetime(data_frame.index)
     
     # plots line graph of mean closing price vs date - WORKING NOW
-    temp.plot(figsize=(15, 5), kind='line', title=f'{ticker} Closing Prices(Monthwise)', fontsize=14)
-    plt.show()
+    # temp.plot(figsize=(15, 5), kind='line', title=f'{ticker} Closing Prices', fontsize=14)
+    # plt.savefig(f"{ticker}.png")
+    # plt.show()
     
     # plots bar graph of mean closing price vs month - WORKING NOW
     # new_temp = data_frame.groupby('month')['Close'].mean().plot.bar()
@@ -380,9 +385,18 @@ def modelSelection(data_frame, ticker):
     close = generateCloseModel(data_frame, ticker)
     holt = HoltExp(data_frame, ticker)
     goldenCross = goldenDeathCross(data_frame, ticker)
-    return(close, holt, goldenCross)
+    decision = sorted([close, holt], key=lambda x: x[2])[0]
+    final = []
+    if decision[0] == goldenCross:
+        final.append(goldenCross)
+    else:
+        final.append("HOLD")
+    final.append(decision[1])
+    final.append(decision[2])
+    final.append(decision[3])
+    # return(close, holt, goldenCross)
     #return sorted([close], key=lambda x: x[2])[0]
-    #return goldenCross
+    return tuple(final)
 
 async def get_data(ticker, api_key):
     ts = TimeSeries(key=api_key, output_format='pandas')
@@ -394,7 +408,6 @@ async def get_data(ticker, api_key):
 
 
 # --- NEXT TASKS ---#
-# TODO: Develop other models based on volume, etc
-# TODO: Async
+
 # TODO: Present status using InitialState
 # TODO: S&P 500 metrics
