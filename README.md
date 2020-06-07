@@ -5,6 +5,7 @@
 * [Introduction](https://github.com/AbChatt/SigmaCapital#introduction)
 * [Technologies](https://github.com/AbChatt/SigmaCapital#technologies)
 * [Requirements](https://github.com/AbChatt/SigmaCapital#requirements)
+* [Status](https://github.com/AbChatt/SigmaCapital#status)
 * [Acknowledgements](https://github.com/AbChatt/SigmaCapital#acknowledgements)
 
 ## Introduction
@@ -15,6 +16,9 @@ The app runs on a Python backend, which samples 5 year historical data from the 
 
 ## Requirements
 Python 3.7 is the main requirement. As such, you will also need to pip install the latest versions of alpha-vantage, ISStreamer and pmdarima (which fetches statsmodels, which is also required).
+
+## Status
+As of 7th June 2020, the project status is still active. For future improvements, we want to add more sophisticated models and indicators to our repertoire so that we can further optimise the accuracy of predictions. We also want to add support for indices such as the S&P500 and FTSE100 and generate sector specific predictions. We are also exploring plans to integrate our product into banking accounts, so we can generate personalised predictions for our customers. Our vision is to create a comprehensive platform that encompasses stocks, bonds, ETFs, foreign exchange and cryptocurrencies. This is just the beginning.
 
 ## Acknowledgements
 We used the [Alpha Vantage API](https://github.com/RomelTorres/alpha_vantage) in order to get the latest, up-to-date stock data. Furthermore, parts of the project were adapted from [here](https://towardsdatascience.com/performing-a-time-series-analysis-on-the-aapl-stock-index-3655da9612ff).
