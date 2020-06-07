@@ -1,4 +1,3 @@
-# Changelog
 # SigmaCapital
  A revolutionary new approach to stock investing through data driven recommendations. SigmaCapital seeks to empower you to make informed financial decisions using the power of data analytics.
 
