@@ -1,5 +1,5 @@
 # SigmaCapital
- A revolutionary new approach to stock investing through data driven recommendations. SigmaCapital seeks to empower you to make informed financial decisions using the power of data analytics.
+ A revolutionary new approach to stock investing through data driven recommendations. SigmaCapital seeks to empower you to make informed financial decisions using the power of data analytics. Winner of "Most Viable Startup" at Hack The NorthEast 2020.
 
 # Table of Contents
 * [Introduction](https://github.com/AbChatt/SigmaCapital#introduction)
